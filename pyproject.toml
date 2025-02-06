@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "sdxs"
+version = "0.1.0"
+description = ""
+authors = ["sky24h <hytian2@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = {version = "2.2.1", source = "torch_cu121"}
+torchvision = {version = "0.17.1", source = "torch_cu121"}
+torchaudio = {version = "2.2.1", source = "torch_cu121"}
+xformers = "0.0.25"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.13.0"
+ruff = "^0.7.1"
+pre-commit = "^4.0.1"
+
+[[tool.poetry.source]]
+name = "torch_cu121"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 144
+

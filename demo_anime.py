@@ -8,7 +8,7 @@ import torch
 from diffusers import StableDiffusionPipeline, AutoencoderKL, AutoencoderTiny
 from peft import PeftModel
 
-device = "cuda"   # Linux & Windows
+device = "cuda"  # Linux & Windows
 weight_type = torch.float16  # torch.float16 works as well, but pictures seem to be a bit worse
 
 pipe = StableDiffusionPipeline.from_pretrained("IDKiro/sdxs-512-dreamshaper", torch_dtype=weight_type)
@@ -21,6 +21,7 @@ vae_tiny.to(device, dtype=weight_type)
 vae_large = AutoencoderKL.from_pretrained("IDKiro/sdxs-512-dreamshaper", subfolder="vae_large")
 vae_tiny.to(device, dtype=weight_type)
 
+
 def pil_image_to_data_url(img, format="PNG"):
     buffered = BytesIO()
     img.save(buffered, format=format)
@@ -32,7 +33,7 @@ def run(
     prompt: str,
     device_type="GPU",
     vae_type=None,
-    param_dtype='torch.float16',
+    param_dtype="torch.float16",
 ) -> PIL.Image.Image:
     if vae_type == "tiny vae":
         pipe.vae = vae_tiny
@@ -40,12 +41,12 @@ def run(
         pipe.vae = vae_large
 
     if device_type == "CPU":
-        device = "cpu" 
-        param_dtype = 'torch.float32'
+        device = "cpu"
+        param_dtype = "torch.float32"
     else:
         device = "cuda"
-    
-    pipe.to(torch_device=device, torch_dtype=torch.float16 if param_dtype == 'torch.float16' else torch.float32)
+
+    pipe.to(torch_device=device, torch_dtype=torch.float16 if param_dtype == "torch.float16" else torch.float32)
 
     result = pipe(
         prompt=prompt,
@@ -77,38 +78,38 @@ with gr.Blocks(css="style.css") as demo:
                         container=False,
                     )
                     run_button = gr.Button("Run", scale=0)
-                    
-                device_choices = ['GPU','CPU']
-                device_type = gr.Radio(device_choices, label='Device',  
-                                            value=device_choices[0],
-                                            interactive=True,
-                                            info='Please choose GPU if you have a GPU.')
 
-                vae_choices = ['tiny vae','large vae']
-                vae_type = gr.Radio(vae_choices, label='Image Decoder Type',  
-                                            value=vae_choices[0],
-                                            interactive=True,
-                                            info='To save GPU memory, use tiny vae. For better quality, use large vae.')
+                device_choices = ["GPU", "CPU"]
+                device_type = gr.Radio(
+                    device_choices, label="Device", value=device_choices[0], interactive=True, info="Please choose GPU if you have a GPU."
+                )
 
-                dtype_choices = ['torch.float16','torch.float32']
-                param_dtype = gr.Radio(dtype_choices,label='torch.weight_type',  
-                                            value=dtype_choices[0],
-                                            interactive=True,
-                                            info='To save GPU memory, use torch.float16. For better quality, use torch.float32.')
-                
+                vae_choices = ["tiny vae", "large vae"]
+                vae_type = gr.Radio(
+                    vae_choices,
+                    label="Image Decoder Type",
+                    value=vae_choices[0],
+                    interactive=True,
+                    info="To save GPU memory, use tiny vae. For better quality, use large vae.",
+                )
+
+                dtype_choices = ["torch.float16", "torch.float32"]
+                param_dtype = gr.Radio(
+                    dtype_choices,
+                    label="torch.weight_type",
+                    value=dtype_choices[0],
+                    interactive=True,
+                    info="To save GPU memory, use torch.float16. For better quality, use torch.float32.",
+                )
+
                 download_output = gr.Button("Download output", elem_id="download_output")
 
             with gr.Column(min_width=512):
                 result = gr.Image(label="Result", height=512, width=512, elem_id="output_image", show_label=False, show_download_button=True)
 
-    gr.Examples(
-        examples=examples,
-        inputs=prompt,
-        outputs=result,
-        fn=run
-    )
+    gr.Examples(examples=examples, inputs=prompt, outputs=result, fn=run)
 
-    demo.load(None,None,None)
+    demo.load(None, None, None)
 
     inputs = [prompt, device_type, vae_type, param_dtype]
     outputs = [result, download_output]
